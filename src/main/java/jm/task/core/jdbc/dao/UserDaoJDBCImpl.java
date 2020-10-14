@@ -35,7 +35,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(Util.URL, Util.NAME, Util.PASSWORD); Statement statement = connection.createStatement()) {
+        try (Connection connection = Util.connection(); Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
             String query = "select * from new_table1";
             ResultSet resultSet = statement.executeQuery(query);
@@ -57,7 +57,7 @@ public class UserDaoJDBCImpl implements UserDao {
         setSql("delete from new_table1;");
     }
     private void setSql(String sql){
-        try (Connection connection = DriverManager.getConnection(Util.URL, Util.NAME, Util.PASSWORD); Statement statement = connection.createStatement()) {
+        try (Connection connection = Util.connection(); Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
             statement.execute(sql);
             connection.commit();
