@@ -36,14 +36,17 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(Util.URL, Util.NAME, Util.PASSWORD); Statement statement = connection.createStatement()) {
+            connection.setAutoCommit(false);
             String query = "select * from new_table1";
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
                 User user = new User(resultSet.getString(2),
                         resultSet.getString(3),resultSet.getByte(4));
+
                 user.setId(resultSet.getLong(1));
                 users.add(user);
             }
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -55,7 +58,9 @@ public class UserDaoJDBCImpl implements UserDao {
     }
     private void setSql(String sql){
         try (Connection connection = DriverManager.getConnection(Util.URL, Util.NAME, Util.PASSWORD); Statement statement = connection.createStatement()) {
+            connection.setAutoCommit(false);
             statement.execute(sql);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
