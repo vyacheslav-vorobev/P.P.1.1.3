@@ -35,7 +35,11 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        try (Connection connection = Util.connection(); Statement statement = connection.createStatement()) {
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = Util.connection();
+            statement = connection.createStatement();
             connection.setAutoCommit(false);
             String query = "select * from new_table1";
             ResultSet resultSet = statement.executeQuery(query);
@@ -48,7 +52,11 @@ public class UserDaoJDBCImpl implements UserDao {
             }
             connection.commit();
         } catch (SQLException e) {
+            rollbackTryCatch(connection);
             e.printStackTrace();
+
+        } finally {
+            closeTryCatch(connection, statement);
         }
         return users;
     }
@@ -57,11 +65,42 @@ public class UserDaoJDBCImpl implements UserDao {
         setSql("delete from new_table1;");
     }
     private void setSql(String sql){
-        try (Connection connection = Util.connection(); Statement statement = connection.createStatement()) {
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = Util.connection();
+            statement = connection.createStatement();
             connection.setAutoCommit(false);
             statement.execute(sql);
             connection.commit();
         } catch (SQLException e) {
+            rollbackTryCatch(connection);
+            e.printStackTrace();
+        } finally {
+         closeTryCatch(connection, statement);
+        }
+    }
+    private void rollbackTryCatch (Connection connection){
+        try {
+            if (connection != null) {
+                connection.rollback();
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    }
+    private void closeTryCatch (Connection connection, Statement statement){
+        try {
+            if (connection != null) {
+                connection.setAutoCommit(true);
+            }
+            if (connection != null) {
+                connection.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+        } catch (SQLException e){
             e.printStackTrace();
         }
     }
